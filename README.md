@@ -33,7 +33,7 @@ npm run build
     * main.js - main file
     * routes.js
 * static - static assets
-
+<!-- 
 # Theme
 You can change theme by 
 1. Generate theme packages by [https://elementui.github.io/theme-preview/#/](https://elementui.github.io/theme-preview/#/)
@@ -54,4 +54,4 @@ You can change theme by
 Modern browsers and IE 10+.
 
 # License
-[MIT](http://opensource.org/licenses/MIT)
+[MIT](http://opensource.org/licenses/MIT) -->
