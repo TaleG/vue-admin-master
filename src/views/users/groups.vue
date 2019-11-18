@@ -17,11 +17,12 @@
       <el-table-column type="selection" width="45"></el-table-column>
       <el-table-column type="index" width="40" label="ID"></el-table-column>
       <el-table-column prop="groupName" label="组名" width="120" sortable></el-table-column>
-      <el-table-column prop="groupDesc" label="描述" sortable></el-table-column>
-      <el-table-column prop="userList" label="用户列表" sortable></el-table-column>
+      <el-table-column prop="groupDesc" label="描述" width="120" sortable></el-table-column>
+      <el-table-column prop="userList" label="用户列表" width="220" sortable></el-table-column>
 
-      <el-table-column fixed="right" label="操作" width="150">
+      <el-table-column fixed="right" label="操作" width="220">
         <template slot-scope="scope">
+          <el-button @click="transfer(scope.row.id)" type="primary" icon="el-icon-share"></el-button>
           <el-button @click="handleEdit(scope.row.id)" type="primary" icon="el-icon-edit"></el-button>
           <el-button @click="handleDelete(scope.row.id)" type="danger" icon="el-icon-delete"></el-button>
         </template>
@@ -38,7 +39,25 @@
       :total="total"
     ></el-pagination>
 
-	<!-- 添加和修改 -->
+    <el-dialog title="添加组成员" :visible.sync="dialogFormVisibleTransfer" style="width: 1200px">
+      <div style="text-align: center">
+        <el-transfer
+          style="text-align: left; display: inline-block"
+          v-model="value"
+          filterable
+          :titles="['用户列表', '组用户']"
+          :button-texts="['到左边', '到右边']"
+          :format="{
+        noChecked: '${total}',
+        hasChecked: '${checked}/${total}'
+      }"
+          @change="changeData"
+          :data="Transferdata"
+        ></el-transfer>
+      </div>
+    </el-dialog>
+
+    <!-- 添加和修改 -->
     <el-dialog title="修改" :visible.sync="dialogFormVisible">
       <el-form
         :rules="rules"
@@ -73,16 +92,21 @@ export default {
   data() {
     return {
       GroupList: [],
+      DataId: null,
       total: 0, // 总记录数
       currentPage: 1, // 当前页码
       pageSize: 5,
       searchMap: {
         groupName: ""
-    },
-    // 请求调用的URL
+      },
+      Transferdata: [],
+      value: [],
+      // 请求调用的URL
       UrlApi: {
         GroupList: "/group_list",
-        Groups: "/groups"
+        Groups: "/groups",
+        LinkListUser: "/userlink",
+        LinkUserGroup: "/groupuser"
       },
       // 请求调用的方法
       MethodType: {
@@ -92,26 +116,28 @@ export default {
         Delete: "Delete"
       },
 
-	  pojo: {
-		  "id": null,
-		  "groupName": '',
-		  "groupDesc": ''
-	  },
-	  dialogFormVisible: false,
-	  rules: {
-		  groupName: [
-			  {
-                required: true, 
-                message: '组名字不能为空',
-                trigger: 'blur'
-            	}
-		  ]
-	  }
+      pojo: {
+        id: null,
+        groupName: "",
+        groupDesc: ""
+      },
+      dialogFormVisible: false,
+      dialogFormVisibleTransfer: false,
+      rules: {
+        groupName: [
+          {
+            required: true,
+            message: "组名字不能为空",
+            trigger: "blur"
+          }
+        ]
+      }
     };
   },
   created() {
     this.GroupDataList();
   },
+
   methods: {
     // 清空formName所有表单信息
     resetForm(formName) {
@@ -140,118 +166,145 @@ export default {
       SupportApi.SupportPostData(
         this.UrlApi.GroupList,
         this.MethodType.Post,
-        pageData).then(response => {
+        pageData
+      ).then(response => {
         const resp = response.data;
         if (resp.code === "200") {
-		  this.GroupList = resp.data;
-		  this.total = resp.total
-        }else {
-			return false
-		}
+          this.GroupList = resp.data;
+          this.total = resp.total;
+        } else {
+          return false;
+        }
       });
-	},
-	handleAdd() {
-		this.dialogFormVisible = true
-		this.$nextTick(() => {
-			this.$refs["pojoForm"].resetFields()
-		})
-	},
-	addData(fromName) {
-		// 判断表单验证是否通过
-		this.$refs[fromName].validate(valid => {
-			if (valid) {
-				SupportApi.SupportPostData(
+    },
+    handleAdd() {
+      this.dialogFormVisible = true;
+      this.$nextTick(() => {
+        this.$refs["pojoForm"].resetFields();
+      });
+    },
+    addData(fromName) {
+      // 判断表单验证是否通过
+      this.$refs[fromName].validate(valid => {
+        if (valid) {
+          SupportApi.SupportPostData(
             this.UrlApi.Groups,
             this.MethodType.Post,
-            this.pojo).then(response => {
-					const resp = response.data
-					if (resp.code === "200") {
-						this.dialogFormVisible = false
-						this.GroupDataList()
-						this.$message({
-							message: resp.codemsg,
-							type: "success"
-						})
-					}else {
-						this.$message({
-							message: resp.codemsg,
-							type: "error"
-						})
-					}
-				})
-			}
-		})
-	},
-	handleEdit(id) {
-		this.handleAdd()
-		SupportApi.SupportDataById(
+            this.pojo
+          ).then(response => {
+            const resp = response.data;
+            if (resp.code === "200") {
+              this.dialogFormVisible = false;
+              this.GroupDataList();
+              this.$message({
+                message: resp.codemsg,
+                type: "success"
+              });
+            } else {
+              this.$message({
+                message: resp.codemsg,
+                type: "error"
+              });
+            }
+          });
+        }
+      });
+    },
+    handleEdit(id) {
+      this.handleAdd();
+      SupportApi.SupportDataById(
         this.UrlApi.GroupList,
         this.MethodType.Get,
-        id).then(response => {
-			const resp = response.data
-			if (resp.code === "200") {
-				this.pojo = resp.data
-			}else {
-				this.$message({
-					message: resp.codemsg,
-					type: "error"
-				})
-			}
-		})
-	},
-	updateData(formData) {
-		this.$refs[formData].validate(valid => {
-			if (valid) {
-				SupportApi.SupportPutData(
+        id
+      ).then(response => {
+        const resp = response.data;
+        if (resp.code === "200") {
+          this.pojo = resp.data;
+        } else {
+          this.$message({
+            message: resp.codemsg,
+            type: "error"
+          });
+        }
+      });
+    },
+    updateData(formData) {
+      this.$refs[formData].validate(valid => {
+        if (valid) {
+          SupportApi.SupportPutData(
             this.UrlApi.Groups,
             this.MethodType.Put,
-            this.pojo).then(response => {
-					const resp = response.data
-					if (resp.code === "200") {
-						this.dialogFormVisible = false
-						this.GroupDataList()
-						this.$message({
-							message: resp.codemsg,
-							type: "success"
-						})
-						this.pojo.id = null
-					}else {
-						this.$message({
-							message: resp.codemsg,
-							type: "error"
-						})
-					}
-				})
-			}else {
-				return false
-			}
-		})
-	},
-	handleDelete(id) {
-		this.$confirm("确认删除这条记录吗？", "提示", {
-			confirmButtonText: "确认",
-            cancelButtonText: "取消"
-		}).then(() => {
-			SupportApi.SupportDataById(
-            this.UrlApi.Groups,
-            this.MethodType.Delete,
-            id).then(response => {
-			const resp = response.data
-			if (resp.code === "200") {
-				this.GroupDataList()
-				this.$message({
-					message: resp.codemsg,
-					type: "success"
-				})
-			}else {
-				this.$message({
-					message: resp.codemsg,
-					type: "error"
-				})
-			}
-		})
-		})
-	}
+            this.pojo
+          ).then(response => {
+            const resp = response.data;
+            if (resp.code === "200") {
+              this.dialogFormVisible = false;
+              this.GroupDataList();
+              this.$message({
+                message: resp.codemsg,
+                type: "success"
+              });
+              this.pojo.id = null;
+            } else {
+              this.$message({
+                message: resp.codemsg,
+                type: "error"
+              });
+            }
+          });
+        } else {
+          return false;
+        }
+      });
+    },
+    handleDelete(id) {
+      this.$confirm("确认删除这条记录吗？", "提示", {
+        confirmButtonText: "确认",
+        cancelButtonText: "取消"
+      }).then(() => {
+        SupportApi.SupportDataById(
+          this.UrlApi.Groups,
+          this.MethodType.Delete,
+          id
+        ).then(response => {
+          const resp = response.data;
+          if (resp.code === "200") {
+            this.GroupDataList();
+            this.$message({
+              message: resp.codemsg,
+              type: "success"
+            });
+          } else {
+            this.$message({
+              message: resp.codemsg,
+              type: "error"
+            });
+          }
+        });
+      });
+    },
+    transfer(id) {
+      this.dialogFormVisibleTransfer = true;
+      this.DataId = id
+      SupportApi.SupportDataById(
+        this.UrlApi.LinkUserGroup,
+        this.MethodType.Get,
+        id
+      ).then(response => {
+        const resp = response.data;
+        if (resp.code === "200") {
+          (this.Transferdata = resp.UserData), (this.value = resp.LinkData);
+        }
+      });
+    },
+    changeData(value, direction, movedKeys) {
+      console.log(this.DataId)
+      if (direction === "right") {
+        console.log("right", value, movedKeys);
+      } else if (direction === "left") {
+        console.log("left", value, movedKeys);
+      }
+    }
   }
 };
 </script>
