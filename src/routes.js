@@ -45,8 +45,7 @@ let routes = [
         iconCls: 'fa fa-id-card-o',//图标样式class
         children: [
             { path: '/member/user', component: Users, name: '用户'},
-            { path: '/member/group', component: Groups, name: '用户组' },
-            { path: '/member/gmanager', component: Groups, name: '用户分组管理' },
+            { path: '/member/group', component: Groups, name: '用户组' }
         ]
     },
     {

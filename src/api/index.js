@@ -50,5 +50,12 @@ export default {
             method: methodType,
             data: SupData
         })
+    },
+    SupportPutLinkData(ApiUrl, methodType, SupData, id) {
+        return request({
+            url: `${ApiUrl}/${id}`,
+            method: methodType,
+            data: SupData
+        })
     }
 }

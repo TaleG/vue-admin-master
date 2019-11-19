@@ -17,8 +17,7 @@
       <el-table-column type="selection" width="45"></el-table-column>
       <el-table-column type="index" width="40" label="ID"></el-table-column>
       <el-table-column prop="groupName" label="组名" width="120" sortable></el-table-column>
-      <el-table-column prop="groupDesc" label="描述" width="120" sortable></el-table-column>
-      <el-table-column prop="userList" label="用户列表" width="220" sortable></el-table-column>
+      <el-table-column prop="groupDesc" label="描述" sortable></el-table-column>
 
       <el-table-column fixed="right" label="操作" width="220">
         <template slot-scope="scope">
@@ -298,11 +297,41 @@ export default {
       });
     },
     changeData(value, direction, movedKeys) {
-      console.log(this.DataId)
       if (direction === "right") {
-        console.log("right", value, movedKeys);
+        // console.log("right", value, movedKeys);
+        let ChangeTypeData = {
+          "movedKeys": movedKeys
+        }
+        SupportApi.SupportPutLinkData(
+          this.UrlApi.LinkUserGroup, 
+          this.MethodType.Post, 
+          ChangeTypeData, 
+          this.DataId).then(response => {
+            const resp = response.data
+            if (resp.code === "200") {
+              this.$message({
+                message: "添加成功",
+                type: "success"
+              })
+            }
+        })
       } else if (direction === "left") {
-        console.log("left", value, movedKeys);
+        let ChangeTypeData = {
+          "movedKeys": movedKeys
+        }
+        SupportApi.SupportPutLinkData(
+          this.UrlApi.LinkUserGroup, 
+          this.MethodType.Delete, 
+          ChangeTypeData, 
+          this.DataId).then(response => {
+            const resp = response.data
+            if (resp.code === "200") {
+              this.$message({
+                message: "移除成功",
+                type: "success"
+              })
+            }
+          })
       }
     }
   }
