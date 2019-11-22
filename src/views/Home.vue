@@ -115,7 +115,7 @@
 				}).then(() => {
 					localStorage.removeItem('token');
 					localStorage.removeItem('userInfo')
-					_this.$router.push('/login');
+					this.$router.push('/login');
 				}).catch(() => {
 
 				});

@@ -10,7 +10,10 @@ export default {
     SupportDataById(ApiUrl, methodType, id) {
         return request ({
             url: `${ApiUrl}/${id}`,
-            method: methodType
+            method: methodType,
+            headers: {
+                'X-CSRFToken': localStorage.getItem('token')
+            }
         })
     },
     // 此处只为了查找登录用户的信息
@@ -35,7 +38,10 @@ export default {
         return request({
             url: `${ApiUrl}/${SupData.id}`,
             method: methodType,
-            data: SupData
+            data: SupData,
+            headers: {
+                'X-CSRFToken': localStorage.getItem('token')
+            }
         })
     },
     // 主要是添加数据和分页查询数据，发送Post请求
@@ -48,14 +54,20 @@ export default {
         return request ({
             url: ApiUrl,
             method: methodType,
-            data: SupData
+            data: SupData,
+            headers: {
+                'X-CSRFToken': localStorage.getItem('token')
+            }
         })
     },
     SupportPutLinkData(ApiUrl, methodType, SupData, id) {
         return request({
             url: `${ApiUrl}/${id}`,
             method: methodType,
-            data: SupData
+            data: SupData,
+            headers: {
+                'X-CSRFToken': localStorage.getItem('token')
+            }
         })
     }
 }

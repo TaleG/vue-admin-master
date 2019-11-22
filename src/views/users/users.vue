@@ -57,6 +57,12 @@
         <el-form-item label="密码" prop="password">
           <el-input type="password" v-model="pojo.password" autocomplete="off"></el-input>
         </el-form-item>
+        <el-form-item label="活动区域" prop="userRole">
+          <el-select v-model="pojo.userRole" placeholder="选择权限">
+            <el-option label="管理员" value="admin"></el-option>
+            <el-option label="普通用户" value="user"></el-option>
+          </el-select>
+        </el-form-item>
         <el-form-item label="邮箱" prop="userEmail">
           <el-input v-model="pojo.userEmail" autocomplete="off"></el-input>
         </el-form-item>
@@ -109,6 +115,7 @@ export default {
         name: "",
         username: "",
         password: "",
+        userRole: "",
         userEmail: "",
         userPhone: "",
         userDesc: ""
